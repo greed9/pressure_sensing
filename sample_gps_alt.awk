@@ -8,21 +8,42 @@ BEGIN {
 
 /GPGGA/ {
 	count ++
-	if( count > 14 ) {
+	if( count > 0 ) {
 		pressure  = 0
 		cmd = ""
+
+		# gawk idiom to shell a command and catch result
        		bme280Cmd | getline pressure
        		close(bme280Cmd)
 		printf ( "\n%f\n", pressure )
-		cmd = sprintf( pushCmd, pressure, $3, $5, $10 * 3.28084 )
+
+		# Pressure to altitude conversion from Wikipedia
+		altitude = 145366.45 * ( 1.0 - ( ( pressure / 1013.25 ) ^ 0.190284 ) )
+
+		# NEMA GPS lat/lon to decimal degrees, from Stack Overflow
+		# lat first.  NEMA is ddmm.mmmm
+		deg = substr( $3, 1,  2) * 1.0
+		min = substr( $3, 3,  7) * 1.0
+		lat = deg + ( min / 60.0 )
+		if( $4 == "S") {
+			lat = lat * -1.0
+		}
+
+		# Now long, NEMA is dddmm.mmmm
+		deg = substr( $5, 1, 3 ) * 1.0
+		min = substr( $5, 4, 7 ) * 1.0
+		lon = deg + ( min / 60.0 )
+		if( $6 == "W") {
+			lon = lon * -1.0
+		}
+
+		# Push pressure altitude, lat, lon, and gps elevation (converted from meters to feet)
+		cmd = sprintf( pushCmd, altitude, lat, lon, $10 * 3.28084 )
 		printf ( "\n%s\n", cmd )
-		system( cmd )
+		#system( cmd )
 		#print pushCmd
 		#fflush( "/dev/stdout")
 		count = 0
 	}
-	#printf( "GPGGA,%f,%f,%f,%f\n", $2, $3, $5, $10 * 3.28084 )
-	#fflush("/dev/stdout")
-	#system( "" )
 }
 
