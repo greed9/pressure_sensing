@@ -72,20 +72,6 @@ void loop()
 {
     long avgTemp = 0L ;
     long avgPressure = 0L ;
-
-    /*
-    for ( int i = 0 ; i < 16 ; i++ )
-    {
-      temperature = bmp085GetTemperature(bmp085ReadUT());
-      pressure = bmp085GetPressure(bmp085ReadUP());
-      avgTemp += temperature ;
-      avgPressure += pressure ;
-      delay ( 30 ) ;
-    }
-    
-    avgTemp /= 16 ;
-    avgPressure /= 16 ;
-    */
     
     temperature = bmp085GetTemperature(bmp085ReadUT());
     pressure = bmp085GetPressure(bmp085ReadUP());
