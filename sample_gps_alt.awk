@@ -4,11 +4,12 @@ BEGIN {
 	pushCmd = "curl -F 'value=%f' -F 'lat=%f' -F 'lon=%f' -F 'ele=%f' -H \"X-AIO-Key: 6ae53a0570984238b46888bc806285fc\" \
   https://io.adafruit.com/api/v2/SnoozeCat/feeds/pressure-altitude/data"
 	bme280Cmd = "python /home/pi/Adafruit_Python_GPIO/Adafruit_Python_BME280/Adafruit_BME280_Example.py"
+	SAMPLE_INTERVAL = 14
 }
 
 /GPGGA/ {
 	count ++
-	if( count > 0 ) {
+	if( count > SAMPLE_INTERVAL ) {
 		pressure  = 0
 		cmd = ""
 
@@ -40,7 +41,7 @@ BEGIN {
 		# Push pressure altitude, lat, lon, and gps elevation (converted from meters to feet)
 		cmd = sprintf( pushCmd, altitude, lat, lon, $10 * 3.28084 )
 		printf ( "\n%s\n", cmd )
-		#system( cmd )
+		system( cmd )
 		#print pushCmd
 		#fflush( "/dev/stdout")
 		count = 0
